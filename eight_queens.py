@@ -1,5 +1,6 @@
 from collections import Counter
 import random
+import numpy as np
 
 
 def evaluate(individual):
@@ -18,11 +19,11 @@ def evaluate(individual):
     for x in range(8):
         diagonalyx[x] = individual[x] - (x + 1)
 
-    revertedIndividual = individual.copy()
-    revertedIndividual.reverse()
+    reverted_individual = individual.copy()
+    reverted_individual.reverse()
 
     for x in reversed(range(8)):
-        diagonalxy[x] = (x + 1) - revertedIndividual[x]
+        diagonalxy[x] = (x + 1) - reverted_individual[x]
 
     dic2 = dict(Counter(diagonalxy))
     dic3 = dict(Counter(diagonalyx))
@@ -33,7 +34,8 @@ def evaluate(individual):
     for x in dic3.keys():
         ed = ed + colatetal_quadratico(dic3[x])
 
-    return ed + de + linha  # substituir pelo seu codigo
+    #print('de = ',de, ', ed = ', ed,', linha = ', linha)
+    return ed + de + linha
 
 
 def colatetal_quadratico(n):
@@ -55,15 +57,24 @@ def tournament(participants):
     :return:list melhor individuo da lista recebida
     """
 
-    bestValue = 9999999999
-    bestArray = []
+    best_value = 9999999999
+    best_array = []
     for x in participants:
         value = evaluate(x)
-        if (value < bestValue):
-            bestArray = x
-            bestValue = value
+        if value < best_value:
+            best_array = x
+            best_value = value
 
-    return bestArray  # substituir pelo seu codigo
+    return best_array
+
+
+def select_two_best_individuals(participants, k):
+    best_participants = []
+    for x in range(2):
+        random_participants = random.sample(participants, k)
+        best_participants.append(tournament(random_participants))
+
+    return best_participants
 
 
 def crossover(parent1, parent2, index):
@@ -94,12 +105,12 @@ def mutate(individual, m):
     :param m:int - probabilidade de mutacao
     :return:list - individuo apos mutacao (ou intacto, caso a prob. de mutacao nao seja satisfeita)
     """
-    indCopy = individual.copy()
-    if (random.random() < m):
-        indCopy[random.randint(0, 7)] = random.randint(1, 8)
+    individual_copy = individual.copy()
+    if random.random() < m:
+        individual_copy[random.randint(0, 7)] = random.randint(1, 8)
 
-    print(indCopy)
-    return indCopy
+    return individual_copy
+
 
 def run_ga(g, n, k, m, e):
     """
@@ -111,7 +122,41 @@ def run_ga(g, n, k, m, e):
     :param e:int - número de indivíduos no elitismo
     :return:list - melhor individuo encontrado
     """
-    raise NotImplementedError  # substituir pelo seu codigo
+    population = []
+
+    for x in range(n):
+        population.append(np.random.randint(1, 9, 8))
+
+    for x in range(g):
+        mutated_population = []
+        while len(mutated_population) < n:
+            best_individuals = select_two_best_individuals(population, k)
+            print(best_individuals)
+            # fazer seleção, pegar 2 melhores indivíduos pelo algoritmo do professor, porém nosso tournament só retorna 1
+            # então é possível que tenha que dividir em dois grupos e fazer a seleção de cada um, só uma ideia aqui
+
+            # fazer crossover com esses dois indivíduos que vai retornar dois novos indivíduos
+
+            # os dois novos indivíduos vão passar por mutation
+
+            # adiciona os novos dois indivíduos ao mutatedPopulation
+        # population = mutated_population.copy()
+
+    # return tournament(population) retornar o melhor indivíduo da nova população gerada
 
 
-mutate([2, 2, 4, 8, 1, 6, 3, 4], 1)
+test_participants = [
+    [2, 2, 4, 8, 1, 6, 3, 4],
+    [2, 7, 4, 1, 1, 8, 2, 8],
+    [3, 3, 4, 2, 3, 6, 1, 1],
+    [6, 5, 4, 8, 1, 3, 8, 2],
+    [2, 4, 4, 2, 3, 6, 5, 3],
+    [1, 2, 4, 8, 1, 8, 3, 5],
+    [4, 1, 4, 5, 7, 6, 8, 4],
+    [8, 8, 7, 3, 5, 2, 1, 7],
+]
+
+# select_two_best_individuals(test_participants, 4)
+run_ga(4, 8, 4, 0.3, 1)
+# evaluate([8, 4, 7, 3, 5, 2, 1, 7])
+# mutate([2, 2, 4, 8, 1, 6, 3, 4], 1)
