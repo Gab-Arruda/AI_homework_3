@@ -20,7 +20,8 @@ def evaluate(individual):
         diagonalyx[x] = individual[x] - (x + 1)
 
     reverted_individual = individual.copy()
-    reverted_individual.reverse()
+    reverted_individual = reverted_individual[::-1]
+    # reverted_individual = reverted_individual.reverse()
 
     for x in reversed(range(8)):
         diagonalxy[x] = (x + 1) - reverted_individual[x]
@@ -34,7 +35,7 @@ def evaluate(individual):
     for x in dic3.keys():
         ed = ed + colatetal_quadratico(dic3[x])
 
-    #print('de = ',de, ', ed = ', ed,', linha = ', linha)
+    # print('de = ',de, ', ed = ', ed,', linha = ', linha)
     return ed + de + linha
 
 
@@ -125,24 +126,31 @@ def run_ga(g, n, k, m, e):
     population = []
 
     for x in range(n):
-        population.append(np.random.randint(1, 9, 8))
+        # population.append(np.random.randint(1, 9, 8)) dava erro pois nao gerava list, gerava ndarray e dai nao tem
+        # alguns métodos
+        population.append([random.randint(1, 8) for i in range(8)])
 
     for x in range(g):
         mutated_population = []
         while len(mutated_population) < n:
+            # seleciona os dois melhores individuos seguindo o algoritmo passado em aula para seleção
             best_individuals = select_two_best_individuals(population, k)
-            print(best_individuals)
-            # fazer seleção, pegar 2 melhores indivíduos pelo algoritmo do professor, porém nosso tournament só retorna 1
-            # então é possível que tenha que dividir em dois grupos e fazer a seleção de cada um, só uma ideia aqui
+            # faz crossover (considerei que sempre faz no ponto 4, mas talvez valha a pena mudar pra ver se melhora
+            best_individuals = crossover(best_individuals[0], best_individuals[1], 4)
+
+            # causa mutação nos dois novos individuos e após isso os adiciona ao mutated_population
+            mutated_population.append(mutate(best_individuals[0], m))
+            mutated_population.append(mutate(best_individuals[1], m))
 
             # fazer crossover com esses dois indivíduos que vai retornar dois novos indivíduos
 
             # os dois novos indivíduos vão passar por mutation
-
-            # adiciona os novos dois indivíduos ao mutatedPopulation
-        # population = mutated_population.copy()
-
-    # return tournament(population) retornar o melhor indivíduo da nova população gerada
+        population = mutated_population.copy()
+    # retornar o melhor indivíduo da nova população gerada
+    best_generated_individual = tournament(population)
+    print('best_generated_individual: ', best_generated_individual)
+    print('number of attacks on best individual: ', evaluate(best_generated_individual))
+    return tournament(population)
 
 
 test_participants = [
@@ -157,6 +165,9 @@ test_participants = [
 ]
 
 # select_two_best_individuals(test_participants, 4)
-run_ga(4, 8, 4, 0.3, 1)
+run_ga(64, 128, 64, 0.3, 1)
 # evaluate([8, 4, 7, 3, 5, 2, 1, 7])
 # mutate([2, 2, 4, 8, 1, 6, 3, 4], 1)
+# evaluate([2, 2, 4, 8, 1, 6, 3, 4])
+
+# a melhor combinação que encontrei até agora que acha em pouco tempo é run_ga(64, 128, 64, 0.3, 1)
