@@ -1,6 +1,6 @@
 from collections import Counter
 import random
-import numpy as np
+#import numpy as np
 
 
 def evaluate(individual):
@@ -112,7 +112,16 @@ def mutate(individual, m):
 
     return individual_copy
 
-
+    
+def elitism (population, e):
+    best_individuals = []
+    for x in range(e):
+        best_individual = tournament(population)
+        best_individuals.append(best_individual)
+        population.remove(best_individual)
+        
+    return best_individuals
+   
 def run_ga(g, n, k, m, e):
     """
     Executa o algoritmo genético e retorna o indivíduo com o menor número de ataques entre rainhas
@@ -129,9 +138,12 @@ def run_ga(g, n, k, m, e):
         # population.append(np.random.randint(1, 9, 8)) dava erro pois nao gerava list, gerava ndarray e dai nao tem
         # alguns métodos
         population.append([random.randint(1, 8) for i in range(8)])
-
+    
+    elite = []    
+    if(e > 0):
+        elite = elitism(population, e)
     for x in range(g):
-        mutated_population = []
+        mutated_population = elite.copy() 
         while len(mutated_population) < n:
             # seleciona os dois melhores individuos seguindo o algoritmo passado em aula para seleção
             best_individuals = select_two_best_individuals(population, k)
@@ -166,6 +178,8 @@ test_participants = [
 
 # select_two_best_individuals(test_participants, 4)
 run_ga(64, 128, 64, 0.3, 1)
+# best_individual_and_index(test_participants)
+# elitism(test_participants, 3)
 # evaluate([8, 4, 7, 3, 5, 2, 1, 7])
 # mutate([2, 2, 4, 8, 1, 6, 3, 4], 1)
 # evaluate([2, 2, 4, 8, 1, 6, 3, 4])
