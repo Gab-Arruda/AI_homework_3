@@ -9,7 +9,14 @@ def compute_mse(theta_0, theta_1, data):
     :param data: np.array - matriz com o conjunto de dados, x na coluna 0 e y na coluna 1
     :return: float - o erro quadratico medio
     """
-    raise NotImplementedError  # substituir pelo seu codigo
+    summation = 0
+
+    for terrain in data:
+        h = theta_0 + theta_1 * terrain[0]
+        square_sum = pow(h-terrain[1], 2)
+        summation = summation + square_sum
+
+    return summation / len(data)
 
 
 def step_gradient(theta_0, theta_1, data, alpha):
@@ -21,7 +28,21 @@ def step_gradient(theta_0, theta_1, data, alpha):
     :param alpha: float - taxa de aprendizado (a.k.a. tamanho do passo)
     :return: float,float - os novos valores de theta_0 e theta_1, respectivamente
     """
-    raise NotImplementedError  # substituir pelo seu codigo
+    summation_theta_zero = 0
+    summation_theta_one = 0
+    for terrain in data:
+        h = theta_0 + theta_1 * terrain[0]
+        error = h - terrain[1]
+        summation_theta_zero = summation_theta_zero + error
+        summation_theta_one = summation_theta_one + error * terrain[0]
+
+    theta_0_deriv = 2 * summation_theta_zero / len(data)
+    theta_1_deriv = 2 * summation_theta_one / len(data)
+
+    theta_0 = theta_0 - alpha * theta_0_deriv
+    theta_1 = theta_1 - alpha * theta_1_deriv
+
+    return theta_0, theta_1
 
 
 def fit(data, theta_0, theta_1, alpha, num_iterations):
@@ -39,4 +60,29 @@ def fit(data, theta_0, theta_1, alpha, num_iterations):
     :param num_iterations: int - numero de épocas/iterações para executar a descida de gradiente
     :return: list,list - uma lista com os theta_0 e outra com os theta_1 obtidos ao longo da execução
     """
-    raise NotImplementedError  # substituir pelo seu codigo
+
+    theta_0_list = []
+    theta_1_list = []
+
+    for iteration in range(num_iterations):
+        thetas = step_gradient(theta_0, theta_1, data, alpha)
+        theta_0 = thetas[0]
+        theta_1 = thetas[1]
+        theta_0_list.append(theta_0)
+        theta_1_list.append(theta_1)
+
+    return theta_0_list, theta_1_list
+
+
+terrains = np.genfromtxt('alegrete.csv', delimiter=',')
+
+data_sample = [
+    [1, 3],
+    [2, 4],
+    [3, 4],
+    [4, 2]
+]
+# compute_mse(0, 0, terrains)
+# step_gradient(1, 1, terrains, 0.1)
+fit(terrains, 1, 1, 0.1, 5)
+
