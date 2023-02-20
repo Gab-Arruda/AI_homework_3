@@ -12,7 +12,7 @@ def evaluate(individual):
     ed = 0
 
     for x in dic1:
-        linha = linha + colatetal_quadratico(x)
+        linha = linha + colateral_quadratico(x)
 
     diagonalxy = [0, 0, 0, 0, 0, 0, 0, 0]
     diagonalyx = [0, 0, 0, 0, 0, 0, 0, 0]
@@ -30,16 +30,16 @@ def evaluate(individual):
     dic3 = dict(Counter(diagonalyx))
 
     for x in dic2.keys():
-        de = de + colatetal_quadratico(dic2[x])
+        de = de + colateral_quadratico(dic2[x])
 
     for x in dic3.keys():
-        ed = ed + colatetal_quadratico(dic3[x])
+        ed = ed + colateral_quadratico(dic3[x])
 
     # print('de = ',de, ', ed = ', ed,', linha = ', linha)
     return ed + de + linha
 
 
-def colatetal_quadratico(n):
+def colateral_quadratico(n):
     soma = 0
     for x in range(n):
         soma = soma + x
@@ -121,6 +121,7 @@ def elitism (population, e):
         population.remove(best_individual)
         
     return best_individuals
+
    
 def run_ga(g, n, k, m, e):
     """
@@ -147,22 +148,39 @@ def run_ga(g, n, k, m, e):
         while len(mutated_population) < n:
             # seleciona os dois melhores individuos seguindo o algoritmo passado em aula para seleção
             best_individuals = select_two_best_individuals(population, k)
-            # faz crossover (considerei que sempre faz no ponto 4, mas talvez valha a pena mudar pra ver se melhora
+            # faz crossover (considerei que sempre faz no ponto 4, mas talvez valha a pena mudar pra ver se melhora)
             best_individuals = crossover(best_individuals[0], best_individuals[1], 4)
 
             # causa mutação nos dois novos individuos e após isso os adiciona ao mutated_population
             mutated_population.append(mutate(best_individuals[0], m))
             mutated_population.append(mutate(best_individuals[1], m))
 
-            # fazer crossover com esses dois indivíduos que vai retornar dois novos indivíduos
-
-            # os dois novos indivíduos vão passar por mutation
         population = mutated_population.copy()
     # retornar o melhor indivíduo da nova população gerada
     best_generated_individual = tournament(population)
     print('best_generated_individual: ', best_generated_individual)
     print('number of attacks on best individual: ', evaluate(best_generated_individual))
-    return tournament(population)
+    return best_generated_individual
+
+
+def test_best_inputs(g, n, k, m, e):
+    """
+    Executa o algoritmo genético e retorna o indivíduo com o menor número de ataques entre rainhas
+    :param g:int - numero de gerações
+    :param n:int - numero de individuos
+    :param k:int - numero de participantes do torneio
+    :param m:float - probabilidade de mutação (entre 0 e 1, inclusive)
+    :param e:int - número de indivíduos no elitismo
+    :return:list - melhor individuo encontrado
+    """
+    count = 0
+    for x in range(100):
+        count = count + evaluate(run_ga(g, n, k, m, e))
+        print('Tentativa: ', x+1)
+
+    print('----------------------------------------------------------------')
+    print('Vezes que o melhor indivíduo tinha conflitos(menor é melhor): ', count * 100 / (x+1), '%')
+    return count
 
 
 test_participants = [
@@ -176,12 +194,21 @@ test_participants = [
     [8, 8, 7, 3, 5, 2, 1, 7],
 ]
 
+test_best_inputs(128, 256, 128, 0.5, 1)
+
 # select_two_best_individuals(test_participants, 4)
-run_ga(64, 128, 64, 0.3, 1)
+# run_ga(128, 256, 128, 0.5, 1)
 # best_individual_and_index(test_participants)
 # elitism(test_participants, 3)
 # evaluate([8, 4, 7, 3, 5, 2, 1, 7])
 # mutate([2, 2, 4, 8, 1, 6, 3, 4], 1)
 # evaluate([2, 2, 4, 8, 1, 6, 3, 4])
 
-# a melhor combinação que encontrei até agora que acha em pouco tempo é run_ga(64, 128, 64, 0.3, 1)
+# % de vezes que o melhor individuo retornado tinha conflitos (menor é melhor)
+# 50% run_ga(64, 256, 32, 0.3, 1)
+# 46% run_ga(64, 128, 64, 0.3, 1)
+# 58% run_ga(64, 128, 64, 0.3, 4)
+# 62% run_ga(64, 128, 32, 0.3, 1)
+# 78% run_ga(64, 128, 64, 0.1, 1)
+# 43% run_ga(64, 128, 64, 0.5, 1)
+# 29% run_ga(128, 256, 128, 0.5, 1)
