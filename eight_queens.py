@@ -1,6 +1,7 @@
 from collections import Counter
 import random
-#import numpy as np
+import time
+import matplotlib.pyplot as plt
 
 
 def evaluate(individual):
@@ -112,17 +113,17 @@ def mutate(individual, m):
 
     return individual_copy
 
-    
-def elitism (population, e):
+
+def elitism(population, e):
     best_individuals = []
     for x in range(e):
         best_individual = tournament(population)
         best_individuals.append(best_individual)
         population.remove(best_individual)
-        
+
     return best_individuals
 
-   
+
 def run_ga(g, n, k, m, e):
     """
     Executa o algoritmo genético e retorna o indivíduo com o menor número de ataques entre rainhas
@@ -133,18 +134,23 @@ def run_ga(g, n, k, m, e):
     :param e:int - número de indivíduos no elitismo
     :return:list - melhor individuo encontrado
     """
+    initial_time = time.perf_counter()
     population = []
+    plot_x = [i + 1 for i in range(g)]
+    best_value = []
+    worst_value = []
+    medium_value = []
 
     for x in range(n):
         # population.append(np.random.randint(1, 9, 8)) dava erro pois nao gerava list, gerava ndarray e dai nao tem
         # alguns métodos
         population.append([random.randint(1, 8) for i in range(8)])
-    
-    elite = []    
-    if(e > 0):
+
+    elite = []
+    if (e > 0):
         elite = elitism(population, e)
     for x in range(g):
-        mutated_population = elite.copy() 
+        mutated_population = elite.copy()
         while len(mutated_population) < n:
             # seleciona os dois melhores individuos seguindo o algoritmo passado em aula para seleção
             best_individuals = select_two_best_individuals(population, k)
@@ -156,10 +162,24 @@ def run_ga(g, n, k, m, e):
             mutated_population.append(mutate(best_individuals[1], m))
 
         population = mutated_population.copy()
+        data_to_plot = get_data_to_plot(population)
+        best_value.append(data_to_plot[0])
+        worst_value.append(data_to_plot[1])
+        medium_value.append(data_to_plot[2])
+    final_time = time.perf_counter() - initial_time
+    # plotar gráfico
+    plt.plot(plot_x, best_value, label="Menor")
+    plt.plot(plot_x, worst_value, label="Maior")
+    plt.plot(plot_x, medium_value, label="Média")
+    plt.legend()
+    plt.xlabel("Gerações")
+    plt.ylabel("Número de conflitos")
+    plt.show()
     # retornar o melhor indivíduo da nova população gerada
     best_generated_individual = tournament(population)
     print('best_generated_individual: ', best_generated_individual)
     print('number of attacks on best individual: ', evaluate(best_generated_individual))
+    print('Time spent: ', final_time)
     return best_generated_individual
 
 
@@ -176,11 +196,37 @@ def test_best_inputs(g, n, k, m, e):
     count = 0
     for x in range(100):
         count = count + evaluate(run_ga(g, n, k, m, e))
-        print('Tentativa: ', x+1)
+        print('Tentativa: ', x + 1)
 
-    print('----------------------------------------------------------------')
-    print('Vezes que o melhor indivíduo tinha conflitos(menor é melhor): ', count * 100 / (x+1), '%')
+    print('---------------------------------------------------------------------')
+    print('Média de conflitos (menor é melhor): ', count / (x + 1))
     return count
+
+
+def get_data_to_plot(participants):
+    """
+    Recebe uma lista com vários indivíduos e retorna o melhor deles, com relação
+    ao numero de conflitos
+    :param participants:list - lista de individuos
+    :return:list melhor individuo da lista recebida
+    """
+
+    best_value = 9999999999
+    worst_value = -1
+    best_array = []
+    worst_array = []
+    value_sum = 0
+    for x in participants:
+        value = evaluate(x)
+        value_sum = value_sum + value
+        if value < best_value:
+            best_array = x
+            best_value = value
+        if value > worst_value:
+            worst_array = x
+            worst_value = value
+
+    return best_value, worst_value, value_sum / len(participants)
 
 
 test_participants = [
@@ -194,10 +240,10 @@ test_participants = [
     [8, 8, 7, 3, 5, 2, 1, 7],
 ]
 
-test_best_inputs(128, 256, 128, 0.5, 1)
+# test_best_inputs(64, 256, 64, 0.5, 1)
 
 # select_two_best_individuals(test_participants, 4)
-# run_ga(128, 256, 128, 0.5, 1)
+run_ga(64, 256, 32, 0.5, 1)
 # best_individual_and_index(test_participants)
 # elitism(test_participants, 3)
 # evaluate([8, 4, 7, 3, 5, 2, 1, 7])
@@ -211,4 +257,8 @@ test_best_inputs(128, 256, 128, 0.5, 1)
 # 62% run_ga(64, 128, 32, 0.3, 1)
 # 78% run_ga(64, 128, 64, 0.1, 1)
 # 43% run_ga(64, 128, 64, 0.5, 1)
+# 35% run_ga(128, 128, 32, 0.5, 1)
 # 29% run_ga(128, 256, 128, 0.5, 1)
+
+# (64, 256, 32, 0.5, 1) 0.46
+# (64, 256, 32, 0.5, 1) 0.37
