@@ -142,12 +142,10 @@ def run_ga(g, n, k, m, e):
     medium_value = []
 
     for x in range(n):
-        # population.append(np.random.randint(1, 9, 8)) dava erro pois nao gerava list, gerava ndarray e dai nao tem
-        # alguns métodos
         population.append([random.randint(1, 8) for i in range(8)])
 
     elite = []
-    if (e > 0):
+    if e > 0:
         elite = elitism(population, e)
     for x in range(g):
         mutated_population = elite.copy()
@@ -156,35 +154,35 @@ def run_ga(g, n, k, m, e):
             best_individuals = select_two_best_individuals(population, k)
             # faz crossover (considerei que sempre faz no ponto 4, mas talvez valha a pena mudar pra ver se melhora)
             best_individuals = crossover(best_individuals[0], best_individuals[1], 4)
-
             # causa mutação nos dois novos individuos e após isso os adiciona ao mutated_population
             mutated_population.append(mutate(best_individuals[0], m))
             mutated_population.append(mutate(best_individuals[1], m))
 
         population = mutated_population.copy()
-        data_to_plot = get_data_to_plot(population)
-        best_value.append(data_to_plot[0])
-        worst_value.append(data_to_plot[1])
-        medium_value.append(data_to_plot[2])
-    final_time = time.perf_counter() - initial_time
+        # data_to_plot = get_data_to_plot(population)
+        # best_value.append(data_to_plot[0])
+        # worst_value.append(data_to_plot[1])
+        # medium_value.append(data_to_plot[2])
+    # final_time = time.perf_counter() - initial_time
     # plotar gráfico
-    plt.plot(plot_x, best_value, label="Menor")
-    plt.plot(plot_x, worst_value, label="Maior")
-    plt.plot(plot_x, medium_value, label="Média")
-    plt.legend()
-    plt.xlabel("Gerações")
-    plt.ylabel("Número de conflitos")
-    plt.show()
+    # plt.plot(plot_x, best_value, label="Menor")
+    # plt.plot(plot_x, worst_value, label="Maior")
+    # plt.plot(plot_x, medium_value, label="Média")
+    # plt.legend()
+    # plt.xlabel("Gerações")
+    # plt.ylabel("Número de conflitos")
+    # plt.show()
     # retornar o melhor indivíduo da nova população gerada
     best_generated_individual = tournament(population)
-    print('best_generated_individual: ', best_generated_individual)
-    print('number of attacks on best individual: ', evaluate(best_generated_individual))
-    print('Time spent: ', final_time)
+    # print('best_generated_individual: ', best_generated_individual)
+    # print('number of attacks on best individual: ', evaluate(best_generated_individual))
+    # print('Time spent: ', final_time)
     return best_generated_individual
 
 
 def test_best_inputs(g, n, k, m, e):
     """
+    Função criada exclusivamente para testar os melhores inputs para o algoritmo
     Executa o algoritmo genético e retorna o indivíduo com o menor número de ataques entre rainhas
     :param g:int - numero de gerações
     :param n:int - numero de individuos
@@ -198,13 +196,14 @@ def test_best_inputs(g, n, k, m, e):
         count = count + evaluate(run_ga(g, n, k, m, e))
         print('Tentativa: ', x + 1)
 
-    print('---------------------------------------------------------------------')
-    print('Média de conflitos (menor é melhor): ', count / (x + 1))
+    # print('---------------------------------------------------------------------')
+    # print('Média de conflitos (menor é melhor): ', count / (x + 1))
     return count
 
 
 def get_data_to_plot(participants):
     """
+    Função usada apenas para plotar os valores para o relatório
     Recebe uma lista com vários indivíduos e retorna o melhor deles, com relação
     ao numero de conflitos
     :param participants:list - lista de individuos
@@ -213,17 +212,13 @@ def get_data_to_plot(participants):
 
     best_value = 9999999999
     worst_value = -1
-    best_array = []
-    worst_array = []
     value_sum = 0
     for x in participants:
         value = evaluate(x)
         value_sum = value_sum + value
         if value < best_value:
-            best_array = x
             best_value = value
         if value > worst_value:
-            worst_array = x
             worst_value = value
 
     return best_value, worst_value, value_sum / len(participants)

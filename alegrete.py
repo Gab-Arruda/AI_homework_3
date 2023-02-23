@@ -71,6 +71,7 @@ def fit(data, theta_0, theta_1, alpha, num_iterations):
         theta_0_list.append(theta_0)
         theta_1_list.append(theta_1)
 
+    # return theta_0, theta_1
     return theta_0_list, theta_1_list
 
 
@@ -83,6 +84,8 @@ data_sample = [
     [4, 2]
 ]
 # compute_mse(0, 0, terrains)
-# step_gradient(1, 1, terrains, 0.1)
-fit(terrains, 1, 1, 0.1, 5)
-
+# step_gradient(1, 1, data_sample, 0.1)
+theta = fit(terrains, 1, 1, 0.1, 5)
+print(theta)
+# print(compute_mse(theta[0], theta[1], terrains))
+# o valor correto é y = -3.45 + 1.16 * x
