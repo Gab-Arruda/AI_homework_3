@@ -82,4 +82,5 @@ for line in lines:
     matrix.append([float(array[0]), float(array[1])])
 
 thetas = fit(matrix, 1, 1, 0.01, 2000)
-# print(thetas)
+# print(compute_mse(thetas[0], thetas[1], matrix))
+# print(thetas[0][1900])

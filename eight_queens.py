@@ -1,7 +1,7 @@
 from collections import Counter
 import random
 import time
-# import matplotlib.pyplot as plt
+import matplotlib.pyplot as plt
 
 
 def evaluate(individual):
@@ -134,7 +134,42 @@ def run_ga(g, n, k, m, e):
     :param e:int - número de indivíduos no elitismo
     :return:list - melhor individuo encontrado
     """
-    initial_time = time.perf_counter()
+    population = []
+
+    for x in range(n):
+        population.append([random.randint(1, 8) for i in range(8)])
+
+    elite = []
+    if e > 0:
+        elite = elitism(population, e)
+    for x in range(g):
+        mutated_population = elite.copy()
+        while len(mutated_population) < n:
+            # seleciona os dois melhores individuos seguindo o algoritmo passado em aula para seleção
+            best_individuals = select_two_best_individuals(population, k)
+            # faz crossover (considerei que sempre faz no ponto 4, mas talvez valha a pena mudar pra ver se melhora)
+            best_individuals = crossover(best_individuals[0], best_individuals[1], 4)
+            # causa mutação nos dois novos individuos e após isso os adiciona ao mutated_population
+            mutated_population.append(mutate(best_individuals[0], m))
+            mutated_population.append(mutate(best_individuals[1], m))
+
+        population = mutated_population.copy()
+    # retornar o melhor indivíduo da nova população gerada
+    best_generated_individual = tournament(population)
+    return best_generated_individual
+
+
+def run_ga_with_plot(g, n, k, m, e):
+    """
+    Executa o algoritmo genético e retorna o indivíduo com o menor número de ataques entre rainhas além de fazer
+    o gráfico com o número de ataques
+    :param g:int - numero de gerações
+    :param n:int - numero de individuos
+    :param k:int - numero de participantes do torneio
+    :param m:float - probabilidade de mutação (entre 0 e 1, inclusive)
+    :param e:int - número de indivíduos no elitismo
+    :return:list - melhor individuo encontrado
+    """
     population = []
     plot_x = [i + 1 for i in range(g)]
     best_value = []
@@ -159,19 +194,21 @@ def run_ga(g, n, k, m, e):
             mutated_population.append(mutate(best_individuals[1], m))
 
         population = mutated_population.copy()
-        # data_to_plot = get_data_to_plot(population)
-        # best_value.append(data_to_plot[0])
-        # worst_value.append(data_to_plot[1])
-        # medium_value.append(data_to_plot[2])
-    # final_time = time.perf_counter() - initial_time
+
+        # essa parte é usada para exibir dados no gráfico
+        data_to_plot = get_data_to_plot(population)
+        best_value.append(data_to_plot[0])
+        worst_value.append(data_to_plot[1])
+        medium_value.append(data_to_plot[2])
+
     # plotar gráfico
-    # plt.plot(plot_x, best_value, label="Menor")
-    # plt.plot(plot_x, worst_value, label="Maior")
-    # plt.plot(plot_x, medium_value, label="Média")
-    # plt.legend()
-    # plt.xlabel("Gerações")
-    # plt.ylabel("Número de conflitos")
-    # plt.show()
+    plt.plot(plot_x, best_value, label="Menor")
+    plt.plot(plot_x, worst_value, label="Maior")
+    plt.plot(plot_x, medium_value, label="Média")
+    plt.legend()
+    plt.xlabel("Gerações")
+    plt.ylabel("Número de conflitos")
+    plt.show()
     # retornar o melhor indivíduo da nova população gerada
     best_generated_individual = tournament(population)
     # print('best_generated_individual: ', best_generated_individual)
@@ -182,8 +219,7 @@ def run_ga(g, n, k, m, e):
 
 def test_best_inputs(g, n, k, m, e):
     """
-    Função criada exclusivamente para testar os melhores inputs para o algoritmo
-    Executa o algoritmo genético e retorna o indivíduo com o menor número de ataques entre rainhas
+    Função criada exclusivamente para testar os melhores inputs para o algoritmo genético
     :param g:int - numero de gerações
     :param n:int - numero de individuos
     :param k:int - numero de participantes do torneio
@@ -204,8 +240,6 @@ def test_best_inputs(g, n, k, m, e):
 def get_data_to_plot(participants):
     """
     Função usada apenas para plotar os valores para o relatório
-    Recebe uma lista com vários indivíduos e retorna o melhor deles, com relação
-    ao numero de conflitos
     :param participants:list - lista de individuos
     :return:list melhor individuo da lista recebida
     """
@@ -224,26 +258,7 @@ def get_data_to_plot(participants):
     return best_value, worst_value, value_sum / len(participants)
 
 
-test_participants = [
-    [2, 2, 4, 8, 1, 6, 3, 4],
-    [2, 7, 4, 1, 1, 8, 2, 8],
-    [3, 3, 4, 2, 3, 6, 1, 1],
-    [6, 5, 4, 8, 1, 3, 8, 2],
-    [2, 4, 4, 2, 3, 6, 5, 3],
-    [1, 2, 4, 8, 1, 8, 3, 5],
-    [4, 1, 4, 5, 7, 6, 8, 4],
-    [8, 8, 7, 3, 5, 2, 1, 7],
-]
-
-# test_best_inputs(64, 256, 64, 0.5, 1)
-
-# select_two_best_individuals(test_participants, 4)
 run_ga(64, 256, 32, 0.5, 1)
-# best_individual_and_index(test_participants)
-# elitism(test_participants, 3)
-# evaluate([8, 4, 7, 3, 5, 2, 1, 7])
-# mutate([2, 2, 4, 8, 1, 6, 3, 4], 1)
-# evaluate([2, 2, 4, 8, 1, 6, 3, 4])
 
 # % de vezes que o melhor individuo retornado tinha conflitos (menor é melhor)
 # 50% run_ga(64, 256, 32, 0.3, 1)
