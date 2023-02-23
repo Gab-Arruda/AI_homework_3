@@ -1,6 +1,3 @@
-import numpy as np
-
-
 def compute_mse(theta_0, theta_1, data):
     """
     Calcula o erro quadratico medio
@@ -75,17 +72,14 @@ def fit(data, theta_0, theta_1, alpha, num_iterations):
     return theta_0_list, theta_1_list
 
 
-terrains = np.genfromtxt('alegrete.csv', delimiter=',')
-
-data_sample = [
-    [1, 3],
-    [2, 4],
-    [3, 4],
-    [4, 2]
-]
-# compute_mse(0, 0, terrains)
-# step_gradient(1, 1, data_sample, 0.1)
-theta = fit(terrains, 1, 1, 0.1, 5)
-print(theta)
-# print(compute_mse(theta[0], theta[1], terrains))
 # o valor correto é y = -3.45 + 1.16 * x
+f = open('alegrete.csv', 'r')
+lines = f.readlines()
+matrix = []
+for line in lines:
+    array = line.split(",")
+    price = array[1].replace("\n", "")
+    matrix.append([float(array[0]), float(array[1])])
+
+thetas = fit(matrix, 1, 1, 0.01, 2000)
+# print(thetas)

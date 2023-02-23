@@ -1,7 +1,7 @@
 from collections import Counter
 import random
 import time
-import matplotlib.pyplot as plt
+# import matplotlib.pyplot as plt
 
 
 def evaluate(individual):
